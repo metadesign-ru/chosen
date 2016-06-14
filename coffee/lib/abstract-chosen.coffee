@@ -178,14 +178,18 @@ class AbstractChosen
         option.search_text = if option.group then option.label else option.html
 
         unless option.group and not @group_search
-          option.search_match = this.search_string_match(option.search_text, regex)
+          option.search_match = this.search_string_match([option.search_text, option.alias], regex)
           results += 1 if option.search_match and not option.group
 
           if option.search_match
             if searchText.length
               startpos = option.search_text.search zregex
-              text = option.search_text.substr(0, startpos + searchText.length) + '</em>' + option.search_text.substr(startpos + searchText.length)
-              option.search_text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
+              if startpos == -1
+                text = option.search_text
+                option.search_text = '<em>' + text.substr(0, searchText.length) + '</em>' + text.substr(searchText.length)
+              else
+                text = option.search_text.substr(0, startpos + searchText.length) + '</em>' + option.search_text.substr(startpos + searchText.length)
+                option.search_text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
 
             results_group.group_match = true if results_group?
 
@@ -206,16 +210,18 @@ class AbstractChosen
     regex_flag = if @case_sensitive_search then "" else "i"
     new RegExp(regex_anchor + escaped_search_string, regex_flag)
 
-  search_string_match: (search_string, regex) ->
-    if regex.test search_string
-      return true
-    else if @enable_split_word_search and (search_string.indexOf(" ") >= 0 or search_string.indexOf("[") == 0)
-      #TODO: replace this substitution of /\[\]/ with a list of characters to skip.
-      parts = search_string.replace(/\[|\]/g, "").split(" ")
-      if parts.length
-        for part in parts
-          if regex.test part
-            return true
+  search_string_match: (search_strings, regex) ->
+    for search_string in search_strings
+      continue unless search_string
+      if regex.test search_string
+        return true
+      else if @enable_split_word_search and (search_string.indexOf(" ") >= 0 or search_string.indexOf("[") == 0)
+        #TODO: replace this substitution of /\[\]/ with a list of characters to skip.
+        parts = search_string.replace(/\[|\]/g, "").split(" ")
+        if parts.length
+          for part in parts
+            if regex.test part
+              return true
 
   choices_count: ->
     return @selected_option_count if @selected_option_count?
@@ -298,4 +304,3 @@ class AbstractChosen
   @default_multiple_text: "Select Some Options"
   @default_single_text: "Select an Option"
   @default_no_result_text: "No results match"
-

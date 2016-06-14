@@ -1,6 +1,6 @@
 class SelectParser
 
-  constructor: ->
+  constructor: (@search_alias) ->
     @options_index = 0
     @parsed = []
 
@@ -27,11 +27,15 @@ class SelectParser
       if option.text != ""
         if group_position?
           @parsed[group_position].children += 1
+
+        alias = @search_alias[option.text]
+
         @parsed.push
           array_index: @parsed.length
           options_index: @options_index
           value: option.value
           text: option.text
+          alias: alias
           html: option.innerHTML
           title: option.title if option.title
           selected: option.selected
@@ -63,6 +67,7 @@ class SelectParser
       map[chr] || "&amp;"
 
 SelectParser.select_to_array = (select) ->
-  parser = new SelectParser()
+  search_alias = $(select).data('search-alias') || {}
+  parser = new SelectParser(search_alias)
   parser.add_node( child ) for child in select.childNodes
   parser.parsed
