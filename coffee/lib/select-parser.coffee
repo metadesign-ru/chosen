@@ -67,7 +67,7 @@ class SelectParser
       map[chr] || "&amp;"
 
 SelectParser.select_to_array = (select) ->
-  search_alias = $(select).data('search-alias') || {}
+  search_alias = JSON.parse(select.getAttribute('data-search-alias') || '{}')
   parser = new SelectParser(search_alias)
   parser.add_node( child ) for child in select.childNodes
   parser.parsed
