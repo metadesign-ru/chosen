@@ -34,6 +34,7 @@ class AbstractChosen
     @include_group_label_in_selected = @options.include_group_label_in_selected || false
     @max_shown_results = @options.max_shown_results || Number.POSITIVE_INFINITY
     @case_sensitive_search = @options.case_sensitive_search || false
+    @underline_search = @options.underline_search || false
 
   set_default_text: ->
     if @form_field.getAttribute("data-placeholder")
@@ -181,7 +182,7 @@ class AbstractChosen
           option.search_match = this.search_string_match([option.search_text, option.alias], regex)
           results += 1 if option.search_match and not option.group
 
-          if option.search_match
+          if @underline_search and option.search_match
             if searchText.length
               startpos = option.search_text.search zregex
               if startpos == -1
