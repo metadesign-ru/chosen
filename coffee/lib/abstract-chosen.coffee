@@ -35,6 +35,7 @@ class AbstractChosen
     @max_shown_results = @options.max_shown_results || Number.POSITIVE_INFINITY
     @case_sensitive_search = @options.case_sensitive_search || false
     @underline_search = @options.underline_search || false
+    @native_wheel = @options.native_wheel || false
 
   set_default_text: ->
     if @form_field.getAttribute("data-placeholder")
