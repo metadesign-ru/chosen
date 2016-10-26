@@ -42,9 +42,13 @@ class Chosen extends AbstractChosen
     @container = ($ "<div />", container_props)
 
     if @is_multiple
-      @container.html '<ul class="chosen-choices"><li class="search-field"><input type="text" value="' + @default_text + '" class="default" autocomplete="off" style="width:25px;" /></li></ul><div class="chosen-drop"><ul class="chosen-results"></ul></div>'
+      @container.html '<ul class="chosen-choices"><li class="search-field"><input type="text" value="' + @default_text + '" class="default" autocomplete="off" style="width:25px;" /></li></ul><div class="chosen-drop"><ul class="chosen-results"></ul></div><div class="search-field-measurer"></div>'
+
     else
       @container.html '<a class="chosen-single chosen-default"><span>' + @default_text + '</span><div><b></b></div></a><div class="chosen-drop"><div class="chosen-search"><input type="text" autocomplete="off" /></div><ul class="chosen-results"></ul></div>'
+
+    if @is_multiple
+      @search_field_measurer = @container.find('div.search-field-measurer').first()
 
     @form_field_jq.hide().after @container
     @dropdown = @container.find('div.chosen-drop').first()
@@ -487,27 +491,34 @@ class Chosen extends AbstractChosen
         this.keydown_arrow()
         break
 
+  apply_search_field_styles_to_measurer: ->
+    style_block = "display:none;"
+    styles = ['font-size','font-style', 'font-weight', 'font-family','line-height', 'text-transform', 'letter-spacing']
+    for style in styles
+      style_block += style + ":" + @search_field.css(style) + ";"
+    @search_field_measurer[0].style = style_block
+
   search_field_scale: ->
     if @is_multiple
+      default_width = 25;
       h = 0
       w = 0
+      measurer = @search_field_measurer
 
-      style_block = "position:absolute; left: -1000px; top: -1000px; display:none;"
-      styles = ['font-size','font-style', 'font-weight', 'font-family','line-height', 'text-transform', 'letter-spacing']
+      input_value = @search_field.val()
 
-      for style in styles
-        style_block += style + ":" + @search_field.css(style) + ";"
+      if !input_value.trim()
+        w = default_width
+      else
+        if measurer[0].style.display != 'none'
+          this.apply_search_field_styles_to_measurer()
+        measurer.text input_value
 
-      div = $('<div />', { 'style' : style_block })
-      div.text @search_field.val()
-      $('body').append div
+        w = measurer.width() + 25
 
-      w = div.width() + 25
-      div.remove()
+        f_width = @container.outerWidth()
 
-      f_width = @container.outerWidth()
-
-      if( w > f_width - 10 )
-        w = f_width - 10
+        if( w > f_width - 10 )
+          w = f_width - 10
 
       @search_field.css({'width': w + 'px'})
